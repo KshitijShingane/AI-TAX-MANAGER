@@ -13,6 +13,13 @@ OCR & Scanner
 - The app includes a camera-based scanner using CameraX and ML Kit on-device text recognition.
 - After capturing a receipt, parsed fields (merchant, date, amount) are shown in a review screen and can be edited before saving to Firestore.
 
+Dev dataset (opt-in)
+- Deducto can optionally collect anonymized parsed receipts from consenting users to improve parsing ML models.
+- Data collected is anonymized: merchant names are hashed (SHA-256), amounts are rounded & bucketed, dates are stored as year-month only, and no raw text or images are sent.
+- Opt-in is requested after the first save and can be toggled in-app (settings). Data is uploaded to Firestore collection `dev_receipts` in project `ai-tax-manager-b1e34`.
+- If you enable this during development, ensure your Firebase rules for `dev_receipts` permit writes from authenticated users only.
+
+
 Run locally
 1. Open the repo and checkout `scaffold/android-skeleton` or the latest feature branch.
 2. Open `android-app` in Android Studio

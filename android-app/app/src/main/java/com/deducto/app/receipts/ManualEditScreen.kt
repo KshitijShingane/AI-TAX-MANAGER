@@ -22,6 +22,9 @@ fun ManualEditScreen(parsed: ParsedReceipt, onSaved: (String) -> Unit, onCancel:
     var saving by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
+    var showOptInDialog by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Review parsed receipt")
         OutlinedTextField(value = merchant, onValueChange = { merchant = it }, label = { Text("Merchant") }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
@@ -39,7 +42,16 @@ fun ManualEditScreen(parsed: ParsedReceipt, onSaved: (String) -> Unit, onCancel:
                 CoroutineScope(Dispatchers.Main).launch {
                     saving = false
                     message = "Saved"
-                    onSaved(id)
+                    // After saving, if user opted-in, upload anonymized parsed data
+                    if (com.deducto.app.devdata.OptInPreferences.isOptedIn(context)) {
+                        com.deducto.app.devdata.DevDatasetUploader.uploadParsedReceipt(parsed, id)
+                        message = "Saved and shared anonymized data"
+                        onSaved(id)
+                    } else {
+                        // Ask for opt-in
+                        showOptInDialog = true
+                        onSaved(id)
+                    }
                 }
             }
         }, modifier = Modifier.padding(top = 12.dp)) {
@@ -53,5 +65,23 @@ fun ManualEditScreen(parsed: ParsedReceipt, onSaved: (String) -> Unit, onCancel:
         if (message.isNotEmpty()) {
             Text(message, modifier = Modifier.padding(top = 8.dp))
         }
+    }
+
+    if (showOptInDialog) {
+        androidx.compose.material.AlertDialog(
+            onDismissRequest = { showOptInDialog = false },
+            title = { Text("Help improve Deducto") },
+            text = { Text("Would you like to share anonymized parsed receipt data to help improve our OCR and parsing? No raw text or images will be sent.") },
+            confirmButton = {
+                Button(onClick = {
+                    com.deducto.app.devdata.OptInPreferences.setOptIn(context, true)
+                    com.deducto.app.devdata.DevDatasetUploader.uploadParsedReceipt(parsed)
+                    showOptInDialog = false
+                }) { Text("Yes, share anonymized data") }
+            },
+            dismissButton = {
+                Button(onClick = { showOptInDialog = false }) { Text("No, thanks") }
+            }
+        )
     }
 }
