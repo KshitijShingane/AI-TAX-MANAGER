@@ -3,16 +3,25 @@ package com.deducto.app.receipts
 import java.util.regex.Pattern
 
 object ReceiptParser {
-    private val amountPattern = Pattern.compile("[₹Rs\s]*([0-9]{1,3}(?:,[0-9]{3})*(?:\\.[0-9]{1,2})?)")
+    // Accepts symbols (₹), Rs, Rs., INR and optional prefixes like Total/Amount
+    private val amountPattern = Pattern.compile("(?i)(?:total[:\s-]*)?(?:₹|Rs\.?|INR)?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\\.[0-9]{1,2})?)")
     private val datePatterns = listOf(
         Pattern.compile("(\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4})"),
         Pattern.compile("(\\d{4}[/-]\\d{1,2}[/-]\\d{1,2})"),
         Pattern.compile("(\\d{1,2}\\s+[A-Za-z]{3,9}\\s+\\d{4})")
     )
 
+    private val headerSkipPatterns = listOf(
+        Pattern.compile("(?i)^(tax|invoice|receipt|bill|gst|sale|amount|total)")
+    )
+
     fun parseReceiptText(text: String): ParsedReceipt {
         val lines = text.lines().map { it.trim() }.filter { it.isNotEmpty() }
-        val merchant = if (lines.isNotEmpty()) lines.first() else ""
+
+        // Merchant heuristics: pick the first line that is not a common header
+        val merchant = lines.firstOrNull { line ->
+            headerSkipPatterns.none { p -> p.matcher(line).find() }
+        } ?: (if (lines.isNotEmpty()) lines.first() else "")
 
         // Find amounts and pick the largest value (likely total)
         val amounts = mutableListOf<Double>()
