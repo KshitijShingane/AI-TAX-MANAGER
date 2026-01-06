@@ -14,4 +14,6 @@ object PermissionUtils {
     fun checkAndRequestPermission(context: Context, permission: String): Boolean {
         return hasPermission(context, permission)
     }
+
+
 }

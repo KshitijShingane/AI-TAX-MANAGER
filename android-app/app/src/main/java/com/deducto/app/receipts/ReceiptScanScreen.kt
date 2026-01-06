@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.livedata.observeAsState
 import com.deducto.app.util.PermissionUtils
 import androidx.compose.ui.Alignment
@@ -40,14 +41,32 @@ fun ReceiptScanScreen(onParsed: (ParsedReceipt) -> Unit) {
     var isProcessing by remember { mutableStateOf(false) }
     var lastError by remember { mutableStateOf<String?>(null) }
 
+    // Use Compose-friendly permission request flow
+    val permissionState = remember { mutableStateOf(PermissionState.Unknown) }
+    val launcher = rememberLauncherForActivityResult(contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { granted ->
+        permissionState.value = if (granted) PermissionState.Granted else PermissionState.Denied
+    }
+
     LaunchedEffect(Unit) {
-        hasPermission = PermissionUtils.checkAndRequestPermission(context as Context, Manifest.permission.CAMERA)
+        val has = PermissionUtils.hasPermission(context as Context, Manifest.permission.CAMERA)
+        permissionState.value = if (has) PermissionState.Granted else PermissionState.Unknown
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        if (!hasPermission) {
-            Text("Camera permission is required to scan receipts")
-            return@Column
+        when (permissionState.value) {
+            PermissionState.Unknown -> {
+                Text("Camera permission is required to scan receipts")
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { launcher.launch(Manifest.permission.CAMERA) }) { Text("Request camera permission") }
+                return@Column
+            }
+            PermissionState.Denied -> {
+                Text("Camera permission denied. Please enable camera permission in app settings.")
+                return@Column
+            }
+            PermissionState.Granted -> {
+                // proceed to camera UI
+            }
         }
 
         Box(modifier = Modifier.weight(1f)) {
