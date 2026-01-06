@@ -20,6 +20,7 @@ local.properties
 *.jks
 *.keystore
 /service-account.json
+/android-app/app/google-services.json
 
 # Node
 node_modules/
