@@ -20,6 +20,15 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v2
+      with:
+        api-level: 33
+        target: android-33
+        build-tools: 33.0.2
+        ndk: ''
+        cache: true
+
     - name: Build with Gradle
       uses: gradle/gradle-build-action@v2
       working-directory: android-app
