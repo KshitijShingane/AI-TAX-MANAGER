@@ -3,11 +3,15 @@ Android App (Kotlin + Jetpack Compose)
 This module contains the Deducto Android app skeleton. Open `android-app` in Android Studio to work on the project.
 
 Key areas to implement:
-- Receipt capture & OCR (ML Kit)
+- Receipt capture & OCR (ML Kit) — CameraX-based scanner and on-device text recognition
 - Firebase Auth & Firestore integration
 - Expense categorization and summaries
 - India tax estimator
 - Export PDF/CSV
+
+OCR & Scanner
+- The app includes a camera-based scanner using CameraX and ML Kit on-device text recognition.
+- After capturing a receipt, parsed fields (merchant, date, amount) are shown in a review screen and can be edited before saving to Firestore.
 
 Run locally
 1. Open the repo and checkout `scaffold/android-skeleton` or the latest feature branch.

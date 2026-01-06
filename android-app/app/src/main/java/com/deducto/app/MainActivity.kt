@@ -16,6 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.deducto.app.firebase.FirebaseModule
 import com.google.firebase.auth.FirebaseAuth
+import com.deducto.app.receipts.ReceiptScanScreen
+import com.deducto.app.receipts.ManualEditScreen
+import com.deducto.app.receipts.ParsedReceipt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,7 +32,18 @@ class MainActivity : ComponentActivity() {
                 if (user == null) {
                     SignInScreen(onSignedIn = { /* Recompose handled by FirebaseAuth state */ })
                 } else {
-                    HomeScreen(user.email ?: "User")
+                    // Show home with scan flow
+                    var parsedReceipt by remember { mutableStateOf<ParsedReceipt?>(null) }
+                    if (parsedReceipt == null) {
+                        ReceiptScanScreen(onParsed = { parsedReceipt = it })
+                    } else {
+                        ManualEditScreen(parsed = parsedReceipt!!, onSaved = { id ->
+                            // After save, go back to scanner
+                            parsedReceipt = null
+                        }, onCancel = {
+                            parsedReceipt = null
+                        })
+                    }
                 }
             }
         }
