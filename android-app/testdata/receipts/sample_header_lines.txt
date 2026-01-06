@@ -1,0 +1,5 @@
+TAX INVOICE
+Company Pvt Ltd
+Invoice No: 123
+Date: 05/02/2025
+Amount: Rs. 999.00
