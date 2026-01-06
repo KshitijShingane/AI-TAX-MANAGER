@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+/build/
+
+# Android
+**/build/
+**/captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+# Intellij
+*.iml
+.idea/
+
+# Mac
+.DS_Store
+
+# Secrets
+*.jks
+*.keystore
+/service-account.json
+
+# Node
+node_modules/
