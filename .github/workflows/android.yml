@@ -21,7 +21,11 @@ jobs:
         java-version: '17'
 
     - name: Build with Gradle
-      run: ./gradlew assembleDebug
+      uses: gradle/gradle-build-action@v2
+      with:
+        arguments: assembleDebug
 
     - name: Run unit tests
-      run: ./gradlew test
+      uses: gradle/gradle-build-action@v2
+      with:
+        arguments: test
