@@ -1,0 +1,18 @@
+{
+  "project_info": {
+    "project_id": "ai-tax-manager-b1e34",
+    "project_number": "<PROJECT_NUMBER>",
+    "name": "ai-tax-manager"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:XXXX:android:XXXX",
+        "android_client_info": {
+          "package_name": "com.deducto.app"
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

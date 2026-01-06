@@ -10,6 +10,12 @@ Key areas to implement:
 - Export PDF/CSV
 
 Run locally
-1. Open Android Studio and import `android-app` as a Gradle project.
-2. Run the app on an emulator or device.
-3. Use the `dev` build flavor for development settings.
+1. Open the repo and checkout `scaffold/android-skeleton` or the latest feature branch.
+2. Open `android-app` in Android Studio
+3. Add your Firebase `google-services.json` to `android-app/app/` — **do not commit**. A template is provided as `google-services.json.template`.
+4. Run `./gradlew assembleDebug` to build and `./gradlew test` to run unit tests.
+
+Firebase setup (dev)
+- Project ID: `ai-tax-manager-b1e34` (we will use this project for Auth/Firestore/Storage)
+- To enable local testing, create an Android app in your Firebase project with package name `com.deducto.app` and download `google-services.json`.
+- The app currently implements a simple Email sign-in flow (auto-creates accounts on sign-in failure) for development convenience.
