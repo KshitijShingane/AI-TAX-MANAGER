@@ -23,15 +23,31 @@ object ReceiptParser {
             headerSkipPatterns.none { p -> p.matcher(line).find() }
         } ?: (if (lines.isNotEmpty()) lines.first() else "")
 
-        // Find amounts and pick the largest value (likely total)
+        // Find amounts using a flexible pattern that handles ₹, Rs, INR, Rupees, parentheses and space/comma separators
         val amounts = mutableListOf<Double>()
-        val matcher = amountPattern.matcher(text)
-        while (matcher.find()) {
-            val group = matcher.group(1) ?: continue
-            val normalized = group.replace(",", "").toDoubleOrNull()
-            normalized?.let { amounts.add(it) }
+        val flexiblePattern = Pattern.compile("(?i)(?:total[:\\s-]*)?(?:₹|Rs\\.?|INR|Rupees)?\\s*\\(?\\s*(-?)\\s*([0-9]{1,3}(?:[,\\s][0-9]{2,3})*(?:\\.[0-9]+)?)\\s*\\)?")
+        val flexMatcher = flexiblePattern.matcher(text)
+        while (flexMatcher.find()) {
+            val signGroup = flexMatcher.group(1) ?: ""
+            val numberGroup = flexMatcher.group(2) ?: continue
+            val rawMatched = flexMatcher.group(0) ?: ""
+            val normalizedNumber = numberGroup.replace("[,\\s]".toRegex(), "")
+            try {
+                val bd = java.math.BigDecimal(normalizedNumber)
+                val rounded = bd.setScale(2, java.math.RoundingMode.HALF_UP)
+                var value = rounded.toDouble()
+                if (signGroup == "-" || rawMatched.contains("(")) {
+                    value = -Math.abs(value)
+                }
+                amounts.add(value)
+            } catch (e: Exception) {
+                // ignore parse errors
+            }
         }
-        val amount = if (amounts.isNotEmpty()) amounts.maxOrNull()!! else 0.0
+        val amount = if (amounts.isNotEmpty()) {
+            val positives = amounts.filter { it >= 0 }
+            if (positives.isNotEmpty()) positives.maxOrNull()!! else amounts.maxOrNull()!!
+        } else 0.0
 
         // Find date
         var date: String? = null

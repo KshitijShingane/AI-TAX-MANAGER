@@ -44,4 +44,27 @@ class ReceiptParserEdgeCasesTest {
         assertEquals(1234.50, parsed.amount, 0.01)
         assertTrue(parsed.rawText.contains("Total"))
     }
+
+    @Test
+    fun parentheses_negative_amount_parsed_as_negative() {
+        val text = """
+        Refund
+        (₹ 1,200.00)
+        """.trimIndent()
+
+        val parsed = ReceiptParser.parseReceiptText(text)
+        assertEquals(-1200.0, parsed.amount, 0.01)
+    }
+
+    @Test
+    fun amount_with_multiple_decimals_is_rounded() {
+        val text = """
+        Shop
+        Total: Rs 123.4567
+        """.trimIndent()
+
+        val parsed = ReceiptParser.parseReceiptText(text)
+        assertEquals(123.46, parsed.amount, 0.01)
+    }
 }
+
