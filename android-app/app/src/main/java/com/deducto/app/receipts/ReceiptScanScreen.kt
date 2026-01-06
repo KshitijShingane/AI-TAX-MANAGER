@@ -34,7 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun ReceiptScanScreen(onParsed: (ParsedReceipt) -> Unit) {
+fun ReceiptScanScreen(onParsed: (ParsedReceipt) -> Unit, onOpenSettings: () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var hasPermission by remember { mutableStateOf(false) }
@@ -107,6 +107,15 @@ fun ReceiptScanScreen(onParsed: (ParsedReceipt) -> Unit) {
         }
 
         lastError?.let { Text("Error: $it") }
+
+        // Small hint about dev dataset opt-in status
+        val optIn = com.deducto.app.devdata.OptInPreferences(LocalContext.current).isOptedIn()
+        Row(modifier = Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(if (optIn) "Dev dataset: Opted in" else "Dev dataset: Opted out", modifier = Modifier.weight(1f))
+            Button(onClick = { onOpenSettings() }) {
+                Text("Settings")
+            }
+        }
     }
 }
 

@@ -32,17 +32,25 @@ class MainActivity : ComponentActivity() {
                 if (user == null) {
                     SignInScreen(onSignedIn = { /* Recompose handled by FirebaseAuth state */ })
                 } else {
-                    // Show home with scan flow
+                    // Show home with scan flow and Settings
                     var parsedReceipt by remember { mutableStateOf<ParsedReceipt?>(null) }
-                    if (parsedReceipt == null) {
-                        ReceiptScanScreen(onParsed = { parsedReceipt = it })
+                    var showSettings by remember { mutableStateOf(false) }
+
+                    if (showSettings) {
+                        com.deducto.app.settings.SettingsScreen(context = this@MainActivity) { showSettings = false }
                     } else {
-                        ManualEditScreen(parsed = parsedReceipt!!, onSaved = { id ->
-                            // After save, go back to scanner
-                            parsedReceipt = null
-                        }, onCancel = {
-                            parsedReceipt = null
-                        })
+                        if (parsedReceipt == null) {
+                            Column {
+                                ReceiptScanScreen(onParsed = { parsedReceipt = it }, onOpenSettings = { showSettings = true })
+                            }
+                        } else {
+                            ManualEditScreen(parsed = parsedReceipt!!, onSaved = { id ->
+                                // After save, go back to scanner
+                                parsedReceipt = null
+                            }, onCancel = {
+                                parsedReceipt = null
+                            })
+                        }
                     }
                 }
             }
